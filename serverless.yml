@@ -1,0 +1,21 @@
+service: {{your-service-name-here}}
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: us-west-2
+  timeout: 900
+  environment:
+    DB_NAME: ${DB_NAME}
+    DB_HOST: ${DB_HOST}
+    DB_PASSWORD: ${DB_PASSWORD}
+    DB_USER: ${DB_USER}
+    
+functions:
+  import:
+    handler: src/handler.main
+    events: 
+      - schedule: rate(1 day)
+

@@ -1,0 +1,101 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@1.2.1
+  serverless-framework: circleci/serverless-framework@1.0.1
+
+alias:
+  - &workdir /home/circleci/build
+
+  - &container_config
+    docker:
+      - image: circleci/python:3.8
+    working_directory: *workdir
+
+  - &checkout checkout
+
+  - &install_aws_cli aws-cli/install
+
+  - &serverless_setup
+    run:
+      name: Installing serverless cli
+      command: sudo apt install nodejs npm && sudo npm install -g serverless
+
+  - &configure_aws_cli
+    aws-cli/setup:
+      aws-region: 'AWS_REGION'
+      aws-access-key-id: 'AWS_ACCESS_KEY_ID'
+      aws-secret-access-key: 'AWS_SECRET_ACCESS_KEY'
+  
+  - &install_deps
+    run:
+      name: Installing dependencies
+      command: pip install -r requirements.txt
+
+  - &validate_deplyoment_yaml
+    run:
+      name: Validate serverless deployment configuration
+      command: make validate-template
+  
+  - &run_unit_tests
+    run:
+      name: Running unit tests
+      command: make test
+    
+  - &deploy
+    run:
+      name: Updating version within ec2
+      command: serverless deploy -v
+  
+  - &build_test_only_filters
+    filters:
+      branches:
+        ignore: master
+  
+  - &deploy_production_filters
+    filters:
+      branches:
+        ignore: /.*/
+      tags:
+        only: /^v.*/
+      
+
+jobs:
+  build:
+    <<: *container_config
+    steps:
+        - *configure_aws_cli
+        - *serverless_setup
+        - *checkout
+        - *install_deps
+        - *validate_deplyoment_yaml
+        - *run_unit_tests
+  deploy:
+    <<: *container_config
+    steps:
+        - *install_aws_cli
+        - *configure_aws_cli
+        - *serverless_setup
+        - *deploy
+
+workflows:
+  version: 2
+
+  build-test-image:
+    jobs:
+      - build:
+          <<: *build_test_only_filters
+          context: aws-production
+
+  deploy-production:
+    jobs:
+      - build:
+          <<: *deploy_production_filters
+          context: aws-production
+      - deploy:
+          <<: *deploy_production_filters
+          context: aws-production
+          requires:
+            - build
+
+
