@@ -2,8 +2,11 @@
 
 Volatrade's opinionated Python3 lambda template
 
+To use this template, just make a new repository on github.com, click the "Use Template" button, name your new function and you're ready to go!
+
 ## Usage
 When using this template to create your own lambda, follow the following steps to ensure you dont break stuff
+
 
 1. Make sure you can run unit tests via `make test`, if not something is wrong with your environment
 
