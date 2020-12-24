@@ -21,8 +21,7 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: true
-    dockerFile: Dockerfile
+    dockerizePip: false
 
 package:
   exclude:

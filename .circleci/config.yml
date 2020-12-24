@@ -45,10 +45,12 @@ alias:
       root: *workdir
       paths:
         - serverless.yml
-        - .env
         - Makefile
         - src
         - handler.py
+        - Dockerfile
+        - requirements.txt
+        - createenv.sh
     
   - &mount_workspace
     attach_workspace:
@@ -86,7 +88,6 @@ jobs:
   build:
     <<: *container_config
     steps:
-        - *setup_remote_docker
         - *configure_aws_cli
         - *serverless_setup
         - *checkout
@@ -97,8 +98,11 @@ jobs:
     <<: *container_config
     steps:
         - *mount_workspace
+        - *setup_remote_docker
+        - *create_env
         - *install_aws_cli
         - *configure_aws_cli
+        - *install_deps
         - *setup-psycopg2
         - *serverless_setup
         - *deploy
@@ -122,5 +126,3 @@ workflows:
           context: aws-production
           requires:
             - build
-
-
