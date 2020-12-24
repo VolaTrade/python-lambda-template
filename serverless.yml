@@ -1,21 +1,30 @@
-service: {{your-service-name-here}}
+service: orderbook-importer
 
 frameworkVersion: '2'
-
 provider:
   name: aws
-  runtime: python3.8
+  stage: prod
+  runtime: python3.7
   region: us-west-2
   timeout: 900
-  environment:
-    DB_NAME: ${DB_NAME}
-    DB_HOST: ${DB_HOST}
-    DB_PASSWORD: ${DB_PASSWORD}
-    DB_USER: ${DB_USER}
-    
+  iamRoleStatements:
+    # Iam roles go here
+
 functions:
-  import:
-    handler: src/handler.main
+  orderbook-importer:
+    handler: handler.handler
     events: 
       - schedule: rate(1 day)
 
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    dockerFile: Dockerfile
+
+package:
+  exclude:
+    - venv/**
+    - node_modules/**

@@ -9,12 +9,14 @@ alias:
 
   - &container_config
     docker:
-      - image: circleci/python:3.8
+      - image: circleci/python:3.7
     working_directory: *workdir
 
   - &checkout checkout
 
   - &install_aws_cli aws-cli/install
+
+  - &setup_remote_docker setup_remote_docker
 
   - &serverless_setup
     run:
@@ -32,20 +34,40 @@ alias:
       name: Installing dependencies
       command: pip install -r requirements.txt
 
-  - &validate_deplyoment_yaml
+  - &create_env
     run:
-      name: Validate serverless deployment configuration
-      command: make validate-template
-  
-  - &run_unit_tests
+      name: Creating .env from environment variables
+      command: make create-env
+
+
+  - &save_to_workspace
+    persist_to_workspace:
+      root: *workdir
+      paths:
+        - serverless.yml
+        - .env
+        - Makefile
+        - src
+        - handler.py
+    
+  - &mount_workspace
+    attach_workspace:
+      at: *workdir
+
+  - &setup-psycopg2
+    run:
+      name: Setting up lambda environmemnt
+      command: git clone https://github.com/jkehler/awslambda-psycopg2.git && mv awslambda-psycopg2/psycopg2-3.7 psycopg2
+
+  - &test
     run:
       name: Running unit tests
       command: make test
-    
+
   - &deploy
     run:
-      name: Updating version within ec2
-      command: serverless deploy -v
+      name: Deploying service
+      command: sls plugin install -n serverless-python-requirements && SLS_DEBUG=* serverless deploy -v
   
   - &build_test_only_filters
     filters:
@@ -64,17 +86,20 @@ jobs:
   build:
     <<: *container_config
     steps:
+        - *setup_remote_docker
         - *configure_aws_cli
         - *serverless_setup
         - *checkout
         - *install_deps
-        - *validate_deplyoment_yaml
-        - *run_unit_tests
+        - *test
+        - *save_to_workspace
   deploy:
     <<: *container_config
     steps:
+        - *mount_workspace
         - *install_aws_cli
         - *configure_aws_cli
+        - *setup-psycopg2
         - *serverless_setup
         - *deploy
 

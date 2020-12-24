@@ -1,3 +1,4 @@
+from .config import *
 
 
 def main(event, context):
@@ -5,6 +6,3 @@ def main(event, context):
     pass
 
 
-# For local testing
-if __name__ == '__main__':
-    main("","")

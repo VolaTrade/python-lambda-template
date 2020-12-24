@@ -1,5 +1,9 @@
+#Env variables go here
 test:
-	python3 -m unittest discover -s tests
+	python3 -m pytest tests/test_*.py
 
-validate-template:
-	sudo sls deploy --noDeploy --stage dev --region us-west-2
+sls-run:
+	serverless invoke local --function orderbook-importer
+
+create-env:
+	sh createenv.sh
