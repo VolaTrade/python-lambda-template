@@ -14,7 +14,7 @@ Need this function to run every n minutes, hours, days or weeks? Use the followi
     - You can create a python3.7 virtual environment using something like `pyenv virtualenv 3.7.9 <lambda-function-name>`
     - Then you can run `pyenv local <lambda-function-name>` to activate your virtual environment
 
-1. If you have to query a postgres db, read the section below on using psycopg2, if not you can remove the `Dockerfile`
+1. If you have to query a postgres db, read the section below on using psycopg2
 
 1. Make sure you update create_env.sh to look like below, where all private keys should be mapped from this to circleci . These environment variables should exist in circleci.
 
