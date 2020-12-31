@@ -15,25 +15,25 @@ create-env:
 
 deps:
 	@if python3 --version | grep $(PY_VERSION); then \
-		@echo "Installing dependencies"; \
+		echo "Installing dependencies"; \
 		pip3 install -r requirements.txt; \
 	@else \
-		@echo "python version seems to be off.. please run create-venv and activate-venv to properly create a python3 virtual environment"; \
+		echo "python version seems to be off.. please run create-venv and activate-venv to properly create a python3 virtual environment"; \
 	fi
 
 create-venv:
 	@if [ -x "$(command -v pyenv)" ]; then \
-		@echo "No matching installation of pyenv found... performing brew install"; \
+		echo "No matching installation of pyenv found... performing brew install"; \
 		@brew install pyenv; \
 	fi
 	echo "Attempting to build virtual environment"
 	@if ! [ -x "$(command -v pyenv activate $(PY_VERSION) $(JOB_NAME))"]; then \
-		@echo "Installing python version $(PY_VERSION)"; \
+		echo "Installing python version $(PY_VERSION)"; \
 		@pyenv install $(PY_VERSION); \
 	@else \
 		@exit 0; \
 	fi
-	@echo "Building virtual environment"
+	echo "Building virtual environment"
 	@pyenv virtualenv $(PY_VERSION) $(JOB_NAME)
 
 
